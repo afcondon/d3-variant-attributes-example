@@ -1,4 +1,4 @@
-module Attributes where
+module Attributes.Variant where
 
 import Prelude
 
@@ -118,9 +118,3 @@ arrayAttribute label = match
   , dynamic: \f -> arrayAttrFromDatum label f
   , indexed: \f -> arrayAttrFromDatum' label f
   }
-
-strokeFill :: StringAttr -> Attribute
-strokeFill = stringAttribute "stroke-fill"
-
-strokeOpacity :: NumberAttr -> Attribute
-strokeOpacity = numberAttribute "stroke-opacity"
