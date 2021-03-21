@@ -98,10 +98,29 @@ _string = Proxy :: Proxy "string"
 _number = Proxy :: Proxy "number"
 _array  = Proxy :: Proxy "array"
 
-strokeFill :: StringAttr -> Attribute
-strokeFill = match
+stringAttribute :: Label -> StringAttr -> Attribute
+stringAttribute label = match
   { static: \a -> staticStringAttr label a
   , dynamic: \f -> stringAttrFromDatum label f
   , indexed: \f -> stringAttrFromDatum' label f
   }
-  where label = "stroke-fill"
+
+numberAttribute :: Label -> NumberAttr -> Attribute
+numberAttribute label = match
+  { static: \a -> staticNumberAttr label a
+  , dynamic: \f -> numberAttrFromDatum label f
+  , indexed: \f -> numberAttrFromDatum' label f
+  }
+
+arrayAttribute :: Label -> ArrayAttr -> Attribute
+arrayAttribute label = match
+  { static: \a -> staticArrayAttr label a
+  , dynamic: \f -> arrayAttrFromDatum label f
+  , indexed: \f -> arrayAttrFromDatum' label f
+  }
+
+strokeFill :: StringAttr -> Attribute
+strokeFill = stringAttribute "stroke-fill"
+
+strokeOpacity :: NumberAttr -> Attribute
+strokeOpacity = numberAttribute "stroke-opacity"
