@@ -1,67 +1,107 @@
 module Attributes where
 
-import Data.Variant (Variant, inj)
-import Prelude (($))
+import Prelude
+
+import Data.Variant (Variant, inj, match)
 import Type.Proxy (Proxy(..))
 
-type Datum = Int
-type Label = String
-
+foreign import data Datum :: Type
 
 type StringAttr = (Variant (static :: String,       dynamic :: Datum -> String,       indexed :: Datum -> Int -> String))
 type NumberAttr = (Variant (static :: Number,       dynamic :: Datum -> Number,       indexed :: Datum -> Int -> Number))
 type ArrayAttr  = (Variant (static :: Array Number, dynamic :: Datum -> Array Number, indexed :: Datum -> Int -> Array Number))
 
-data Attribute = Attr Label (Variant (stringish :: StringAttr, numberish :: NumberAttr, arrayish :: ArrayAttr))
+staticString :: String -> StringAttr
+staticString = inj (Proxy :: Proxy "static") -- "red"
+
+stringFromDatum :: (Datum -> String) -> StringAttr
+stringFromDatum f = inj (Proxy :: Proxy "dynamic") f -- (\d -> "red") 
+
+stringFromDatum' :: (Datum -> Int -> String) -> StringAttr
+stringFromDatum' f = inj (Proxy :: Proxy "indexed") f -- (\d i -> "red") 
 
 
-staticString :: StringAttr
-staticString = inj (Proxy :: Proxy "static") "red" 
-dynamicString :: StringAttr
-dynamicString = inj (Proxy :: Proxy "dynamic") (\d -> "red") 
-indexedString :: StringAttr
-indexedString = inj (Proxy :: Proxy "indexed") (\d i -> "red") 
+staticNumber :: Number -> NumberAttr
+staticNumber = inj (Proxy :: Proxy "static") -- 42.0 
 
-staticStringAttr :: Attribute
-staticStringAttr = Attr "stroke" $
-  inj (Proxy :: Proxy "stringish") staticString
-dynamicStringAttr :: Attribute
-dynamicStringAttr = Attr "stroke" $
-  inj (Proxy :: Proxy "stringish") dynamicString
-indexedStringAttr :: Attribute
-indexedStringAttr = Attr "stroke" $
-  inj (Proxy :: Proxy "stringish") indexedString
+numberFromDatum :: (Datum -> Number) -> NumberAttr
+numberFromDatum f = inj (Proxy :: Proxy "dynamic") f -- (\d -> 42.0) 
 
-staticNumber :: NumberAttr
-staticNumber = inj (Proxy :: Proxy "static") 42.0 
-dynamicNumber :: NumberAttr
-dynamicNumber = inj (Proxy :: Proxy "dynamic") (\d -> 42.0) 
-indexedNumber :: NumberAttr
-indexedNumber = inj (Proxy :: Proxy "indexed") (\d i -> 42.0) 
+numberFromDatum' :: (Datum -> Int -> Number) -> NumberAttr
+numberFromDatum' f = inj (Proxy :: Proxy "indexed") f -- (\d i -> 42.0) 
 
-staticNumberAttr :: Attribute
-staticNumberAttr = Attr "stroke-opacity" $
-  inj (Proxy :: Proxy "numberish") staticNumber
-dynamicNumberAttr :: Attribute
-dynamicNumberAttr = Attr "stroke-opacity" $
-  inj (Proxy :: Proxy "numberish") dynamicNumber
-indexedNumberAttr :: Attribute
-indexedNumberAttr = Attr "stroke-opacity" $
-  inj (Proxy :: Proxy "numberish") indexedNumber
 
-staticArray :: ArrayAttr
-staticArray = inj (Proxy :: Proxy "static") [42.0] 
-dynamicArray :: ArrayAttr
-dynamicArray = inj (Proxy :: Proxy "dynamic") (\d -> [42.0]) 
-indexedArray :: ArrayAttr
-indexedArray = inj (Proxy :: Proxy "indexed") (\d i -> [42.0]) 
+staticArray :: Array Number -> ArrayAttr
+staticArray = inj (Proxy :: Proxy "static") -- [42.0] 
 
-staticArrayAttr :: Attribute
-staticArrayAttr = Attr "viewbox" $
-  inj (Proxy :: Proxy "arrayish") staticArray
-dynamicArrayAttr :: Attribute
-dynamicArrayAttr = Attr "viewbox" $
-  inj (Proxy :: Proxy "arrayish") dynamicArray
-indexedArrayAttr :: Attribute
-indexedArrayAttr = Attr "viewbox" $
-  inj (Proxy :: Proxy "arrayish") indexedArray
+arrayFromDatum :: (Datum -> Array Number) -> ArrayAttr
+arrayFromDatum f = inj (Proxy :: Proxy "dynamic") f -- (\d -> [42.0]) 
+
+arrayFromDatum' :: (Datum -> Int -> Array Number) -> ArrayAttr
+arrayFromDatum' f = inj (Proxy :: Proxy "indexed") f -- (\d i -> [42.0]) 
+
+
+type Label = String
+data Attribute = Attr Label (Variant (string :: StringAttr, number :: NumberAttr, array :: ArrayAttr))
+
+staticStringAttr :: Label -> String -> Attribute
+staticStringAttr label = Attr label <<<
+  inj (Proxy :: Proxy "string") <<<
+  staticString
+
+stringAttrFromDatum :: Label -> (Datum -> String) -> Attribute
+stringAttrFromDatum label = Attr label <<<
+  inj (Proxy :: Proxy "string") <<< 
+  stringFromDatum
+
+stringAttrFromDatum' :: Label -> (Datum -> Int -> String) -> Attribute
+stringAttrFromDatum' label = Attr label <<<
+  inj (Proxy :: Proxy "string") <<<
+  stringFromDatum'
+
+
+staticNumberAttr :: Label -> Number -> Attribute
+staticNumberAttr label = Attr label <<<
+  inj (Proxy :: Proxy "number") <<<
+  staticNumber
+
+numberAttrFromDatum :: Label -> (Datum -> Number) -> Attribute
+numberAttrFromDatum label = Attr label <<<
+  inj (Proxy :: Proxy "number") <<<
+  numberFromDatum
+
+numberAttrFromDatum' :: Label -> (Datum -> Int -> Number) -> Attribute
+numberAttrFromDatum' label = Attr label <<<
+  inj (Proxy :: Proxy "number") <<<
+  numberFromDatum'
+
+
+staticArrayAttr :: Label -> Array Number -> Attribute
+staticArrayAttr label = Attr label <<<
+  inj (Proxy :: Proxy "array") <<<
+  staticArray
+
+arrayAttrFromDatum :: Label -> (Datum -> Array Number) -> Attribute
+arrayAttrFromDatum label = Attr label <<<
+  inj (Proxy :: Proxy "array") <<<
+  arrayFromDatum
+
+arrayAttrFromDatum' :: Label -> (Datum -> Int -> Array Number) -> Attribute
+arrayAttrFromDatum' label = Attr label <<<
+  inj (Proxy :: Proxy "array") <<<
+  arrayFromDatum'
+
+_static    = Proxy :: Proxy "static"
+_dynamic   = Proxy :: Proxy "dynamic"
+_indexed   = Proxy :: Proxy "indexed"
+_string = Proxy :: Proxy "string"
+_number = Proxy :: Proxy "number"
+_array  = Proxy :: Proxy "array"
+
+strokeFill :: StringAttr -> Attribute
+strokeFill = match
+  { static: \a -> staticStringAttr label a
+  , dynamic: \f -> stringAttrFromDatum label f
+  , indexed: \f -> stringAttrFromDatum' label f
+  }
+  where label = "stroke-fill"

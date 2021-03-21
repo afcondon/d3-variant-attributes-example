@@ -1,25 +1,15 @@
 module Main where
 
 import Attributes
-import Prelude
+import Prelude (Unit, ($))
 
 import Data.Variant (inj)
 import Effect (Effect)
 import Effect.Console (log)
 import Type.Proxy (Proxy(..))
 
-strokeOpacity :: NumberAttr -> Attribute
-strokeOpacity n = Attr "stroke-opacity" $
-  inj (Proxy :: Proxy "numberish") n
-
-attrs :: Array Attribute
-attrs = [ staticStringAttr, dynamicStringAttr, indexedStringAttr
-        , staticNumberAttr, dynamicNumberAttr, indexedNumberAttr
-        , staticArrayAttr, dynamicArrayAttr, indexedArrayAttr ]
-
-foo = strokeOpacity staticNumber
-bar = strokeOpacity dynamicNumber
-baz = strokeOpacity indexedNumber
+foo = strokeFill $ staticString "red"
+foo2 = strokeFill $ stringFromDatum (\d -> "red")
 
 main :: Effect Unit
 main = do
