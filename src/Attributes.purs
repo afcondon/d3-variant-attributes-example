@@ -2,14 +2,23 @@ module Attributes.Variant where
 
 import Prelude
 
+import Data.Tuple (Tuple(..))
 import Data.Variant (Variant, inj, match)
 import Type.Proxy (Proxy(..))
 
 foreign import data Datum :: Type
 
-type StringAttr = (Variant (static :: String,       dynamic :: Datum -> String,       indexed :: Datum -> Int -> String))
-type NumberAttr = (Variant (static :: Number,       dynamic :: Datum -> Number,       indexed :: Datum -> Int -> Number))
-type ArrayAttr  = (Variant (static :: Array Number, dynamic :: Datum -> Array Number, indexed :: Datum -> Int -> Array Number))
+data UnitType = Px | Pt | Em | Rem | Percent
+
+type StringAttr = (Variant ( static :: String
+                           , dynamic :: Datum -> String
+                           , indexed :: Datum -> Int -> String))
+type NumberAttr = (Variant ( static :: Number
+                           , dynamic :: Datum -> Number
+                           , indexed :: Datum -> Int -> Number))
+type ArrayAttr  = (Variant ( static :: Array Number
+                           , dynamic :: Datum -> Array Number
+                           , indexed :: Datum -> Int -> Array Number))
 
 staticString :: String -> StringAttr
 staticString = inj (Proxy :: Proxy "static") -- "red"
@@ -19,7 +28,6 @@ stringFromDatum f = inj (Proxy :: Proxy "dynamic") f -- (\d -> "red")
 
 stringFromDatum' :: (Datum -> Int -> String) -> StringAttr
 stringFromDatum' f = inj (Proxy :: Proxy "indexed") f -- (\d i -> "red") 
-
 
 staticNumber :: Number -> NumberAttr
 staticNumber = inj (Proxy :: Proxy "static") -- 42.0 
@@ -42,7 +50,10 @@ arrayFromDatum' f = inj (Proxy :: Proxy "indexed") f -- (\d i -> [42.0])
 
 
 type Label = String
-data Attribute = Attr Label (Variant (string :: StringAttr, number :: NumberAttr, array :: ArrayAttr))
+data Attribute = Attr Label (Variant (string :: StringAttr
+                                     , number :: NumberAttr
+                                     , unitNumber :: Tuple NumberAttr UnitType
+                                     , array :: ArrayAttr ))
 
 staticStringAttr :: Label -> String -> Attribute
 staticStringAttr label = Attr label <<<
