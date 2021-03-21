@@ -2,7 +2,6 @@ module Attributes.Variant where
 
 import Prelude
 
-import Data.Tuple (Tuple(..))
 import Data.Variant (Variant, inj, match)
 import Type.Proxy (Proxy(..))
 

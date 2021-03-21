@@ -1,6 +1,7 @@
 module Attributes.Concrete where
 
 import Attributes.Variant
+import Prelude
 
 strokeColor :: StringAttr -> Attribute
 strokeColor = stringAttribute "stroke"
@@ -8,13 +9,14 @@ strokeColor = stringAttribute "stroke"
 strokeOpacity :: NumberAttr -> Attribute
 strokeOpacity = numberAttribute "stroke-opacity"
 
+strokeWidth :: NumberAttr -> Attribute
+strokeWidth = numberAttribute "stroke-width"
+
 fill :: StringAttr -> Attribute
 fill = stringAttribute "fill"
 
 viewBox :: Number -> Number -> Number -> Number -> Attribute
-viewBox = arrayAttribute "viewbox" <<< staticArray <<< exactlyFour
-  where
-    exactlyFour xo yo width height = [ x0, yo, width, height ]
+viewBox xo yo width height = arrayAttribute "viewbox" $ staticArray [ xo, yo, width, height ]
 
 fontFamily :: StringAttr -> Attribute
 fontFamily = stringAttribute "font-family"
@@ -22,56 +24,29 @@ fontFamily = stringAttribute "font-family"
 textAnchor :: StringAttr -> Attribute
 textAnchor = stringAttribute "text-anchor"
 
-strokeWidth :: Number -> NumberUnit -> Attribute
-strokeWidth n u = staticNumberAttrWithUnits "stroke-width" n u
+radius :: NumberAttr -> Attribute
+radius = numberAttribute "r"
 
-radius :: Number -> NumberUnit -> Attribute
-radius n u = staticNumberAttrWithUnits "r" n u
+fontSize :: NumberAttr -> Attribute
+fontSize = numberAttribute "font-size"
 
-fontSize :: Number -> NumberUnit -> Attribute
-fontSize n u = staticNumberAttrWithUnits "font-size" n u
+width :: NumberAttr -> Attribute
+width = numberAttribute "width"
 
-width :: Number -> NumberUnit -> Attribute
-width n u = staticNumberAttrWithUnits "width" n u
+height :: NumberAttr -> Attribute
+height = numberAttribute "height"
 
-height :: Number -> NumberUnit -> Attribute
-height n u = staticNumberAttrWithUnits "height" n u
+x :: NumberAttr -> Attribute
+x = numberAttribute "x"
 
-x :: Number -> NumberUnit -> Attribute
-x n u = staticNumberAttrWithUnits "x" n u
+y :: NumberAttr -> Attribute
+y = numberAttribute "y"
 
-y :: Number -> NumberUnit -> Attribute
-y n u = staticNumberAttrWithUnits "y" n u
+dx :: NumberAttr -> Attribute
+dx = numberAttribute "dx"
 
-dx :: Number -> NumberUnit -> Attribute
-dx n u = staticNumberAttrWithUnits "dx" n u
-
-dy :: Number -> NumberUnit -> Attribute
-dy n u = staticNumberAttrWithUnits "dy" n u
+dy :: NumberAttr -> Attribute
+dy = numberAttribute "dy"
 
 text :: StringAttr -> Attribute
 text = stringAttribute "text"
-
-textAnchor :: StringAttr -> Attribute
-textAnchor = stringAttribute "text-anchor"
-
-computeStrokeWidth :: NumberUnit -> (Datum -> Number) -> Attribute
-computeStrokeWidth u f = StringAttr "stroke-width" (datumToStringWithUnit u f)
-  
-computeStrokeOpacity :: (Datum -> Number) -> Attribute
-computeStrokeOpacity = NumberAttr "stroke-opacity"
-
-computeRadius :: NumberUnit -> (Datum -> Number) -> Attribute
-computeRadius u f = StringAttr "r" (datumToStringWithUnit u f)
-
-computeX :: NumberUnit -> (Datum -> Number) -> Attribute
-computeX u f = StringAttr "x" (datumToStringWithUnit u f)
-
-computeY :: NumberUnit -> (Datum -> Number) -> Attribute
-computeY u f = StringAttr "y" (datumToStringWithUnit u f)
-
-computeDX :: NumberUnit -> (Datum -> Number) -> Attribute
-computeDX u f = StringAttr "dx" (datumToStringWithUnit u f)
-
-computeDY :: NumberUnit -> (Datum -> Number) -> Attribute
-computeDY u f = StringAttr "dy" (datumToStringWithUnit u f)
